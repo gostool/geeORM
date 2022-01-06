@@ -36,7 +36,7 @@ func Parse(dest interface{}, d dialect.Dialect) *Schema {
 
 	for i := 0; i < modelType.NumField(); i++ {
 		p := modelType.Field(i)
-		if p.Anonymous && ast.IsExported(p.Name) {
+		if !p.Anonymous && ast.IsExported(p.Name) {
 			field := &Field{
 				Name: p.Name,
 				Type: d.DataTypeOf(reflect.Indirect(reflect.New(p.Type))),
