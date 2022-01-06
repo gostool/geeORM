@@ -10,19 +10,16 @@ type Engine struct {
 	db *sql.DB
 }
 
-func NewEngine(driver, source string) (e *Engine, err error) {
+func NewEngine(driver, source string) (engine *Engine, err error) {
 	db, err := sql.Open(driver, source)
 	if err != nil {
-		log.Error(err)
-		return
+		return nil, err
 	}
 	// Send a ping to make sure the database connection is alive.
 	if err = db.Ping(); err != nil {
-		log.Error(err)
-		return
+		return nil, err
 	}
-	e = &Engine{db: db}
-	log.Info("Connect database success")
+	engine = &Engine{db: db}
 	return
 }
 
