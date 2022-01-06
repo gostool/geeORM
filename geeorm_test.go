@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
 )
+
 
 func TestDB(t *testing.T) {
 	engine, err := NewEngine("sqlite3", "gee.db")
@@ -28,4 +30,8 @@ func TestXorm(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer engine.Close()
+}
+
+func TestGfOrm(t *testing.T) {
+	t.Log(gdb.DefaultGroupName)
 }
