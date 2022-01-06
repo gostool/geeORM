@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"testing"
+	"xorm.io/xorm"
 )
 
 func TestDB(t *testing.T) {
@@ -17,4 +18,10 @@ func TestDB(t *testing.T) {
 	fmt.Printf("Exec success, %d affected\n", count)
 }
 
-
+func TestXorm(t *testing.T) {
+	engine, err := xorm.NewEngine("sqlite3", "gee2.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer engine.Close()
+}
