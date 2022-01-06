@@ -2,13 +2,17 @@ package geeORM
 
 import (
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
+
+	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
 )
 
 func TestDB(t *testing.T) {
-	engine, _ := NewEngine("sqlite3", "gee.db")
+	engine, err := NewEngine("sqlite3", "gee.db")
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer engine.Close()
 	s := engine.NewSession()
 	_, _ = s.Raw("DROP TABLE IF EXISTS User;").Exec()
