@@ -27,6 +27,7 @@ func (schema *Schema) GetField(name string) *Field {
 }
 
 func Parse(dest interface{}, d dialect.Dialect) *Schema {
+	//因为设计的入参是一个对象的指针，因此需要 reflect.Indirect() 获取指针指向的实例
 	modelType := reflect.Indirect(reflect.ValueOf(dest)).Type()
 	schema := &Schema{
 		Model:    dest,
