@@ -26,6 +26,15 @@ func (schema *Schema) GetField(name string) *Field {
 	return schema.fieldMap[name]
 }
 
+func (schema *Schema) RecordValues(dest interface{}) []interface{} {
+	destValue := reflect.Indirect(reflect.ValueOf(dest))
+	var fieldValues []interface{}
+	for _, field := range schema.Fields {
+		fieldValues = append(fieldValues, destValue.FieldByName(field.Name).Interface())
+	}
+	return fieldValues
+}
+
 func Parse(dest interface{}, d dialect.Dialect) *Schema {
 	//因为设计的入参是一个对象的指针，因此需要 reflect.Indirect() 获取指针指向的实例
 	modelType := reflect.Indirect(reflect.ValueOf(dest)).Type()
