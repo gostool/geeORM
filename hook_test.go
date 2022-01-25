@@ -33,7 +33,7 @@ func TestSession_CallMethod(t *testing.T) {
 	_ = s.DropTable()
 	_ = s.CreateTable()
 	_, _ = s.Insert(&Account{1, "12345"}, &Account{2, "qwerty"})
-	u := Account{}
+	u := &Account{}
 	err = s.First(u)
 	if err != nil || u.ID != 1001 || u.Password != "******" {
 		t.Fatal("Failed to call hooks after query, got", u)

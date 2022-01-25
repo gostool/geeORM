@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"geeORM/log"
 	"reflect"
 )
@@ -24,7 +23,6 @@ func (s *Session) CallMethod(method string, value interface{}) {
 		fm = reflect.ValueOf(value).MethodByName(method)
 	}
 	param := []reflect.Value{reflect.ValueOf(s)}
-	fmt.Println("param:", param)
 	if fm.IsValid() {
 		if v := fm.Call(param); len(v) > 0 {
 			if err, ok := v[0].Interface().(error); ok {
