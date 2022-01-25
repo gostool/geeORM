@@ -11,12 +11,13 @@ func (s *Session) Insert(values ...interface{}) (int64, error) {
 	for _, value := range values {
 		table := s.Model(value).RefTable()
 		s.clause.Set(clause.INSERT, table.Name, table.FieldNames)
+		s.CallMethod(BeforeInsert, value)
 		recordValues = append(recordValues, table.RecordValues(value))
 	}
-
 	s.clause.Set(clause.VALUES, recordValues...)
 	sql, vars := s.clause.Build(clause.INSERT, clause.VALUES)
 	result, err := s.Raw(sql, vars...).Exec()
+	s.CallMethod(AfterInsert, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -30,6 +31,7 @@ func (s *Session) Find(values interface{}) error {
 
 	s.clause.Set(clause.SELECT, table.Name, table.FieldNames)
 	sql, vars := s.clause.Build(clause.SELECT, clause.WHERE, clause.ORDERBY, clause.LIMIT)
+	s.CallMethod(BeforeQuery, nil)
 	rows, err := s.Raw(sql, vars...).QueryRows()
 	if err != nil {
 		return err
@@ -43,6 +45,7 @@ func (s *Session) Find(values interface{}) error {
 		if err := rows.Scan(values...); err != nil {
 			return err
 		}
+		s.CallMethod(AfterQuery, dest.Addr().Interface())
 		destSLice.Set(reflect.Append(destSLice, dest))
 	}
 	return rows.Close()
@@ -58,9 +61,11 @@ func (s *Session) Update(kv ...interface{}) (int64, error) {
 			m[kv[i].(string)] = kv[i+1]
 		}
 	}
+	s.CallMethod(BeforeUpdate, nil)
 	s.clause.Set(clause.UPDATE, s.refTable.Name, m)
 	sql, vars := s.clause.Build(clause.UPDATE, clause.WHERE)
 	result, err := s.Raw(sql, vars...).Exec()
+	s.CallMethod(AfterUpdate, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -69,8 +74,10 @@ func (s *Session) Update(kv ...interface{}) (int64, error) {
 
 func (s *Session) Delete() (int64, error) {
 	s.clause.Set(clause.DELETE, s.refTable.Name)
+	s.CallMethod(BeforeDelete, nil)
 	sql, vars := s.clause.Build(clause.DELETE, clause.WHERE)
 	result, err := s.Raw(sql, vars...).Exec()
+	s.CallMethod(AfterDelete, nil)
 	if err != nil {
 		return 0, err
 	}
