@@ -1,6 +1,7 @@
 package geeORM
 
 import (
+	"geeORM/session"
 	"testing"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -44,4 +45,57 @@ func TestXorm(t *testing.T) {
 
 func TestGfOrm(t *testing.T) {
 	t.Log(gdb.DefaultGroupName)
+}
+
+func OpenDB(t *testing.T) *Engine {
+	t.Helper()
+	engine, err := NewEngine("sqlite3", "gee.db")
+	if err != nil {
+		t.Fatal("failed to open db", err)
+	}
+	return engine
+}
+
+func TestEngine_Transaction(t *testing.T) {
+	t.Run("rollback", func(t *testing.T) {
+		transactionRollback(t)
+	})
+	t.Run("commit", func(t *testing.T) {
+		transactionCommit(t)
+	})
+}
+
+func transactionCommit(t *testing.T) {
+	engine := OpenDB(t)
+	defer engine.Close()
+	s := engine.NewSession()
+	_ = s.Model(&User{}).DropTable()
+	_, err := engine.Transaction(func(s *session.Session) (result interface{}, err error) {
+		_ = s.Model(&User{}).CreateTable()
+		_, err = s.Insert(&User{"Tom", 18})
+		return nil, err
+	})
+	if err == nil || s.HasTable() {
+		t.Fatal("failed to rollback")
+	}
+}
+
+func transactionRollback(t *testing.T) {
+	engine := OpenDB(t)
+	defer engine.Close()
+	s := engine.NewSession()
+	_ = s.Model(&User{}).DropTable()
+	_, err := engine.Transaction(func(s *session.Session) (result interface{}, err error) {
+		_ = s.Model(&User{}).CreateTable()
+		_, err = s.Insert(&User{"Tom", 18})
+		return nil, err
+	})
+	if err != nil {
+		t.Fatal("failed to commit")
+	}
+	u := &User{}
+	_ = s.First(u)
+	if u.Name != "Tom" {
+		t.Fatal("failed to commit")
+	}
 }
